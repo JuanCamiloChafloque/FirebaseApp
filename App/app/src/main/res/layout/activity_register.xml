@@ -103,7 +103,7 @@
                 android:layout_weight="1"
                 android:ems="10"
                 android:hint="Latitude"
-                android:inputType="numberDecimal" />
+                android:inputType="phone" />
 
             <EditText
                 android:id="@+id/etLong"
@@ -112,7 +112,7 @@
                 android:layout_weight="1"
                 android:ems="10"
                 android:hint="Longitude"
-                android:inputType="numberDecimal" />
+                android:inputType="phone" />
 
         </LinearLayout>
 

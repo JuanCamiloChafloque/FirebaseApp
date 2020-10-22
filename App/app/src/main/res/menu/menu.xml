@@ -10,7 +10,7 @@
         app:showAsAction="always"/>
     <item
         android:id="@+id/menuLista"
-        android:icon="@drawable/listar"
+        android:icon="@drawable/disponible"
         android:title="Listar usuarios"
         app:showAsAction="always"/>
     <item

@@ -121,11 +121,7 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     data = dataSnapshot.getValue(Usuario.class);
                     swDisp.setChecked(data.getDisponible());
-                    LatLng myLocation = new LatLng(data.getLatitude(), data.getLongitude());
-
-                    mMap.addMarker(new MarkerOptions().position(myLocation).title("Current location").snippet("My Home").alpha(0.75f)
-                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
-                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 15));
+                    initLocation();
                 }
                 @Override
                 public void onCancelled(@NonNull DatabaseError databaseError) {
@@ -133,5 +129,14 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
             });
         }
+    }
+
+    private void initLocation(){
+        LatLng myLocation = new LatLng(data.getLatitude(), data.getLongitude());
+        mMap.addMarker(new MarkerOptions().position(myLocation).title("Current location").snippet("My Home").alpha(0.75f)
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 15));
+
+        //LEE EL JSON CON LAS 5 UBICACIONES
     }
 }
