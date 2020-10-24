@@ -2,7 +2,6 @@ package com.example.taller3;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.FragmentActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -10,16 +9,12 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ListView;
 import android.widget.Switch;
 import android.widget.Toast;
 
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -30,34 +25,45 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
-public class HomeActivity extends AppCompatActivity implements OnMapReadyCallback {
+import java.util.ArrayList;
+import java.util.List;
+
+public class DisponiblesActivity extends AppCompatActivity {
 
     private static final String PATH_USERS = "users/";
-
-    private GoogleMap mMap;
-    private Switch swDisp;
+    private static final String PATH_IMAGE = "images/";
 
     private FirebaseAuth mAuth;
-
     private FirebaseUser user;
-    private Usuario data;
     private FirebaseDatabase mDatabase;
+    private StorageReference mStorage;
     private DatabaseReference mRef;
+    private Usuario data;
 
+    private DisponiblesAdapter adapter;
+    private ListView listView;
+    private List<Usuario> disponibles;
+
+    private Switch swDisp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_home);
-        getSupportActionBar().setTitle("Home");
+        setContentView(R.layout.activity_disponibles);
+
+       getSupportActionBar().setTitle("Disponibles");
 
         mAuth = FirebaseAuth.getInstance();
         mDatabase = FirebaseDatabase.getInstance();
+        mRef = mDatabase.getReference(PATH_USERS);
+        mStorage = FirebaseStorage.getInstance().getReference();
 
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
+        disponibles = new ArrayList<>();
+        listView = findViewById(R.id.lvLayout);
+        initDisponibles();
+        adapter = new DisponiblesAdapter(this, disponibles);
+        listView.setAdapter(adapter);
+
     }
 
     @Override
@@ -65,17 +71,6 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onStart();
         user = mAuth.getCurrentUser();
         initCurrentUser(user);
-    }
-
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
-
-        mMap.getUiSettings().setZoomGesturesEnabled(true);
-        mMap.getUiSettings().setZoomControlsEnabled(true);
-        mMap.getUiSettings().setMyLocationButtonEnabled(true);
-        mMap.getUiSettings().setCompassEnabled(true);
-
     }
 
     @Override
@@ -104,13 +99,11 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
         int id = item.getItemId();
         if(id == R.id.menuLogOut) {
             mAuth.signOut();
-            Intent intent = new Intent(HomeActivity.this, MainActivity.class);
+            Intent intent = new Intent(DisponiblesActivity.this, MainActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(intent);
-        } else if(id == R.id.menuLista){
-            Intent intent = new Intent(HomeActivity.this, DisponiblesActivity.class);
-            startActivity(intent);
         }
+
         return true;
     }
 
@@ -122,22 +115,50 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     data = dataSnapshot.getValue(Usuario.class);
                     swDisp.setChecked(data.getDisponible());
-                    initLocation();
                 }
                 @Override
                 public void onCancelled(@NonNull DatabaseError databaseError) {
-                    Toast.makeText(HomeActivity.this, "Data retriving failed!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(DisponiblesActivity.this, "Data recollection failed!", Toast.LENGTH_SHORT).show();
                 }
             });
         }
     }
 
-    private void initLocation(){
-        LatLng myLocation = new LatLng(data.getLatitude(), data.getLongitude());
-        mMap.addMarker(new MarkerOptions().position(myLocation).title("Current location").snippet("My Home").alpha(0.75f)
-                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 15));
+    private void initDisponibles(){
 
-        //LEE EL JSON CON LAS 5 UBICACIONES
+        mRef = mDatabase.getReference(PATH_USERS);
+        mRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for(DataSnapshot entity: dataSnapshot.getChildren()){
+                    final Usuario usuario = entity.getValue(Usuario.class);
+                    Log.i("USER", usuario.getName() + " " + entity.getKey());
+
+                    if(usuario.getDisponible()){
+                        disponibles.add(usuario);
+                        /*final long ONE_MEGABYTE = 1024 * 1024;
+                        StorageReference photoRef = mStorage.child(PATH_IMAGE + entity.getKey() + "/profile.png");
+                        photoRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                            @Override
+                            public void onSuccess(byte[] bytes) {
+                                usuario.setPhoto(bytes);
+                                disponibles.add(usuario);
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Toast.makeText(DisponiblesActivity.this, "Data recollection failed!", Toast.LENGTH_SHORT).show();
+                            }
+                        });*/
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
     }
 }

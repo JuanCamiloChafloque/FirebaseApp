@@ -10,6 +10,7 @@ public class Usuario {
     private double latitude;
     private double longitude;
     private boolean disponible;
+    private byte[] photo;
 
     public Usuario(){
 
@@ -58,4 +59,20 @@ public class Usuario {
     public void setDisponible(boolean disponible) { this.disponible = disponible; }
 
     public boolean getDisponible() { return disponible; }
+
+    public void setPhoto(byte[] photo) { this.photo = photo; }
+
+    public byte[] getPhoto() { return photo; }
+
+    @Override
+    public String toString() {
+        return "Usuario{" +
+                "name='" + name + '\'' +
+                ", apellido='" + apellido + '\'' +
+                ", id=" + id +
+                ", latitude=" + latitude +
+                ", longitude=" + longitude +
+                ", disponible=" + disponible +
+                '}';
+    }
 }
