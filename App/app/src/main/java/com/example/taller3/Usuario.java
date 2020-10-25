@@ -16,6 +16,15 @@ public class Usuario {
 
     }
 
+    public Usuario(String name, String apellido, int id, double latitude, double longitude, boolean disponible){
+        this.name = name;
+        this.apellido = apellido;
+        this.id = id;
+        this.latitude= latitude;
+        this.longitude = longitude;
+        this.disponible = disponible;
+    }
+
     public void setName(String name){
         this.name = name;
     }

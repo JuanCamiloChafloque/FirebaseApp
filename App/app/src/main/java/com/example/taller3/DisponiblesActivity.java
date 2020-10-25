@@ -57,10 +57,11 @@ public class DisponiblesActivity extends AppCompatActivity {
         mDatabase = FirebaseDatabase.getInstance();
         mRef = mDatabase.getReference(PATH_USERS);
         mStorage = FirebaseStorage.getInstance().getReference();
-
         disponibles = new ArrayList<>();
+        //disponibles.add(new Usuario("Juan Camilo", "Chafloque Mesia", 1020828518, 4.65, -74.5, false));
+        //disponibles.add(new Usuario("Martin", "Chafloque Mesia", 1000201020, 4.76, -74.32, false));
+        //disponibles.add(new Usuario("Julio", "Mejía Vera", 100431020, 4.43, -74.21, false));
         listView = findViewById(R.id.lvLayout);
-        initDisponibles();
         adapter = new DisponiblesAdapter(this, disponibles);
         listView.setAdapter(adapter);
 
@@ -71,6 +72,7 @@ public class DisponiblesActivity extends AppCompatActivity {
         super.onStart();
         user = mAuth.getCurrentUser();
         initCurrentUser(user);
+        initDisponibles();
     }
 
     @Override
@@ -125,18 +127,14 @@ public class DisponiblesActivity extends AppCompatActivity {
     }
 
     private void initDisponibles(){
-
         mRef = mDatabase.getReference(PATH_USERS);
         mRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 for(DataSnapshot entity: dataSnapshot.getChildren()){
                     final Usuario usuario = entity.getValue(Usuario.class);
-                    Log.i("USER", usuario.getName() + " " + entity.getKey());
-
                     if(usuario.getDisponible()){
-                        disponibles.add(usuario);
-                        /*final long ONE_MEGABYTE = 1024 * 1024;
+                        final long ONE_MEGABYTE = 1024 * 1024;
                         StorageReference photoRef = mStorage.child(PATH_IMAGE + entity.getKey() + "/profile.png");
                         photoRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
                             @Override
@@ -149,7 +147,7 @@ public class DisponiblesActivity extends AppCompatActivity {
                             public void onFailure(@NonNull Exception e) {
                                 Toast.makeText(DisponiblesActivity.this, "Data recollection failed!", Toast.LENGTH_SHORT).show();
                             }
-                        });*/
+                        });
                     }
                 }
             }
@@ -159,6 +157,5 @@ public class DisponiblesActivity extends AppCompatActivity {
 
             }
         });
-
     }
 }
