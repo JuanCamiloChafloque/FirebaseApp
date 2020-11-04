@@ -58,9 +58,9 @@ public class DisponiblesActivity extends AppCompatActivity {
         mRef = mDatabase.getReference(PATH_USERS);
         mStorage = FirebaseStorage.getInstance().getReference();
         disponibles = new ArrayList<>();
-        //disponibles.add(new Usuario("Juan Camilo", "Chafloque Mesia", 1020828518, 4.65, -74.5, false));
-        //disponibles.add(new Usuario("Martin", "Chafloque Mesia", 1000201020, 4.76, -74.32, false));
-        //disponibles.add(new Usuario("Julio", "Mejía Vera", 100431020, 4.43, -74.21, false));
+        disponibles.add(new Usuario("Juan Camilo", "Chafloque Mesia", 1020828518, 4.65, -74.5, false));
+        disponibles.add(new Usuario("Martin", "Chafloque Mesia", 1000201020, 4.76, -74.32, false));
+        disponibles.add(new Usuario("Julio", "Mejía Vera", 100431020, 4.43, -74.21, false));
         listView = findViewById(R.id.lvLayout);
         adapter = new DisponiblesAdapter(this, disponibles);
         listView.setAdapter(adapter);
@@ -71,8 +71,8 @@ public class DisponiblesActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         user = mAuth.getCurrentUser();
-        initCurrentUser(user);
-        initDisponibles();
+        //initCurrentUser(user);
+        //initDisponibles();
     }
 
     @Override
