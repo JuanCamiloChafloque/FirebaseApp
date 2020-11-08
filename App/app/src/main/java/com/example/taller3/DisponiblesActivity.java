@@ -131,7 +131,7 @@ public class DisponiblesActivity extends AppCompatActivity {
                 List<Usuario> disponibles = new ArrayList<>();
                 for(DataSnapshot entity: dataSnapshot.getChildren()){
                     Usuario usuario = entity.getValue(Usuario.class);
-                    if(usuario.getDisponible()){
+                    if(usuario.getDisponible() && entity.getKey() != user.getUid()){
                         usuario.setKey(entity.getKey());
                         usuario.setPhoto(getPhoto(entity.getKey()));
                         disponibles.add(usuario);

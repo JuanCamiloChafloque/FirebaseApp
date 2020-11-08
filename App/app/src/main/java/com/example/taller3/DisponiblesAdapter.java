@@ -2,6 +2,7 @@ package com.example.taller3;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.text.Layout;
@@ -17,6 +18,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import com.google.android.gms.tasks.OnFailureListener;
@@ -39,7 +41,7 @@ public class DisponiblesAdapter extends ArrayAdapter<Usuario> {
     }
 
     @Override
-    public View getView(final int i, View view, ViewGroup viewGroup) {
+    public View getView(final int i, View view, final ViewGroup viewGroup) {
 
         LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View mView = layoutInflater.from(this.context).inflate(R.layout.disponibles, viewGroup, false);
@@ -49,13 +51,17 @@ public class DisponiblesAdapter extends ArrayAdapter<Usuario> {
         btnLoc.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.i("button", usuarios.get(i).getLatitude() + " " + usuarios.get(i).getLongitude());
+                Intent intent = new Intent(getContext(), MapsActivity.class);
+                intent.putExtra("key", usuarios.get(i).getKey());
+                view.getContext().startActivity(intent);
             }
         });
-        final ImageView ivPhoto = mView.findViewById(R.id.ivProfile);
 
-        Bitmap bm = BitmapFactory.decodeByteArray(usuarios.get(i).getPhoto(), 0, usuarios.get(i).getPhoto().length);
-        ivPhoto.setImageBitmap(bm);
+        ImageView ivPhoto = mView.findViewById(R.id.ivProfile);
+
+        //Bitmap bm = BitmapFactory.decodeByteArray(usuarios.get(i).getPhoto(), 0, usuarios.get(i).getPhoto().length);
+        //ivPhoto.setImageBitmap(bm);
+        ivPhoto.setImageResource(R.drawable.app);
         name.setText(this.usuarios.get(i).getName());
         apellido.setText(this.usuarios.get(i).getApellido());
 
