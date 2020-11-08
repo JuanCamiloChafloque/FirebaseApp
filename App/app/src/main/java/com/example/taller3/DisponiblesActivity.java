@@ -42,7 +42,7 @@ public class DisponiblesActivity extends AppCompatActivity {
 
     private DisponiblesAdapter adapter;
     private ListView listView;
-    private List<Usuario> disponibles;
+    private List<Usuario> disponibles = new ArrayList<Usuario>();
 
     private Switch swDisp;
 
@@ -57,22 +57,21 @@ public class DisponiblesActivity extends AppCompatActivity {
         mDatabase = FirebaseDatabase.getInstance();
         mRef = mDatabase.getReference(PATH_USERS);
         mStorage = FirebaseStorage.getInstance().getReference();
-        disponibles = new ArrayList<>();
+        initDisponibles();
         disponibles.add(new Usuario("Juan Camilo", "Chafloque Mesia", 1020828518, 4.65, -74.5, false));
         disponibles.add(new Usuario("Martin", "Chafloque Mesia", 1000201020, 4.76, -74.32, false));
         disponibles.add(new Usuario("Julio", "Mejía Vera", 100431020, 4.43, -74.21, false));
+        disponibles.add(new Usuario("Julian", "Parada", 100431020, 4.43, -74.21, false));
         listView = findViewById(R.id.lvLayout);
         adapter = new DisponiblesAdapter(this, disponibles);
         listView.setAdapter(adapter);
-
     }
 
     @Override
     protected void onStart() {
         super.onStart();
         user = mAuth.getCurrentUser();
-        //initCurrentUser(user);
-        //initDisponibles();
+        initCurrentUser(user);
     }
 
     @Override
@@ -112,7 +111,7 @@ public class DisponiblesActivity extends AppCompatActivity {
     public void initCurrentUser(FirebaseUser user){
         if(user != null){
             mRef = mDatabase.getReference(PATH_USERS + user.getUid());
-            mRef.addValueEventListener(new ValueEventListener() {
+            mRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     data = dataSnapshot.getValue(Usuario.class);
@@ -157,5 +156,6 @@ public class DisponiblesActivity extends AppCompatActivity {
 
             }
         });
+        Log.i("USUARIO", "" + disponibles.size());
     }
 }

@@ -342,7 +342,7 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void initCurrentUser(FirebaseUser user){
         if(user != null){
             mRef = mDatabase.getReference(PATH_USERS + user.getUid());
-            mRef.addValueEventListener(new ValueEventListener() {
+            mRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     data = dataSnapshot.getValue(Usuario.class);
