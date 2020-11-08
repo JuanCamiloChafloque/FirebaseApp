@@ -83,6 +83,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mAuth = FirebaseAuth.getInstance();
         mDatabase = FirebaseDatabase.getInstance();
 
+        getSupportActionBar().setTitle("Seguimiento");
+
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.followMap);
         mapFragment.getMapAsync(this);
@@ -254,7 +256,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-    @Override
+    /*@Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu, menu);
         MenuItem disp = menu.findItem(R.id.menuDisp);
@@ -273,9 +275,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
         return true;
-    }
+    }*/
 
-    @Override
+    /*@Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
         if(id == R.id.menuLogOut) {
@@ -288,7 +290,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             startActivity(intent);
         }
         return true;
-    }
+    }*/
 
     public void initCurrentUser(FirebaseUser user){
         if(user != null){
@@ -297,7 +299,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     data = dataSnapshot.getValue(Usuario.class);
-                    swDisp.setChecked(data.getDisponible());
+                    //swDisp.setChecked(data.getDisponible());
                 }
                 @Override
                 public void onCancelled(@NonNull DatabaseError databaseError) {
@@ -310,7 +312,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     other = dataSnapshot.getValue(Usuario.class);
-                    getSupportActionBar().setTitle(other.getName() + " " + other.getApellido());
+                    //getSupportActionBar().setTitle(other.getName() + " " + other.getApellido());
                 }
 
                 @Override
