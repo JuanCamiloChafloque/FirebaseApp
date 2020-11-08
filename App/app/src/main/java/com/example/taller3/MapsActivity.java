@@ -128,6 +128,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             updateCurrentPosition();
         }
 
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(4.65, -74.05), 12));
+
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder().addLocationRequest(mLocationRequest);
         SettingsClient client = LocationServices.getSettingsClient(this);
         Task<LocationSettingsResponse> task = client.checkLocationSettings(builder.build());
@@ -232,9 +234,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
                         mMap.addMarker(new MarkerOptions().position(otherLocation).title("Other user location").alpha(0.75f)
                                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));
-                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 12));
-                        double dist = distance(myLocation.latitude, myLocation.longitude, otherLocation.latitude, otherLocation.longitude);
-                        Toast.makeText(MapsActivity.this, "Distance is: " + dist + " km", Toast.LENGTH_LONG).show();
+                        if(location.getLatitude() != data.getLatitude() && location.getLongitude() != data.getLongitude()){
+                            data.setLatitude(location.getLatitude());
+                            data.setLongitude(location.getLongitude());
+                            mRef = mDatabase.getReference(PATH_USERS + user.getUid() + "/" + "latitude");
+                            mRef.setValue(location.getLatitude());
+                            mRef = mDatabase.getReference(PATH_USERS + user.getUid() + "/" + "longitude");
+                            mRef.setValue(location.getLongitude());
+                            double dist = distance(myLocation.latitude, myLocation.longitude, otherLocation.latitude, otherLocation.longitude);
+                            Toast.makeText(MapsActivity.this, "Distance is: " + dist + " km", Toast.LENGTH_LONG).show();
+                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 14));
+                        }
                     }
                 }
             }
@@ -256,42 +266,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-    /*@Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu, menu);
-        MenuItem disp = menu.findItem(R.id.menuDisp);
-        swDisp = (Switch) disp.getActionView();
-
-        swDisp.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(swDisp.isChecked()){
-                    mRef = mDatabase.getReference(PATH_USERS + user.getUid() + "/" + "disponible");
-                    mRef.setValue(true);
-                } else {
-                    mRef = mDatabase.getReference(PATH_USERS + user.getUid() + "/" + "disponible");
-                    mRef.setValue(false);
-                }
-            }
-        });
-        return true;
-    }*/
-
-    /*@Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        int id = item.getItemId();
-        if(id == R.id.menuLogOut) {
-            mAuth.signOut();
-            Intent intent = new Intent(MapsActivity.this, MainActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(intent);
-        } else if(id == R.id.menuLista){
-            Intent intent = new Intent(MapsActivity.this, DisponiblesActivity.class);
-            startActivity(intent);
-        }
-        return true;
-    }*/
-
     public void initCurrentUser(FirebaseUser user){
         if(user != null){
             mRef = mDatabase.getReference(PATH_USERS + user.getUid());
@@ -299,7 +273,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     data = dataSnapshot.getValue(Usuario.class);
-                    //swDisp.setChecked(data.getDisponible());
                 }
                 @Override
                 public void onCancelled(@NonNull DatabaseError databaseError) {
@@ -312,7 +285,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     other = dataSnapshot.getValue(Usuario.class);
-                    //getSupportActionBar().setTitle(other.getName() + " " + other.getApellido());
+                    double dist = distance(data.getLatitude(), data.getLongitude(), other.getLatitude(), other.getLongitude());
+                    Toast.makeText(MapsActivity.this, "Distance is: " + dist + " km", Toast.LENGTH_LONG).show();
                 }
 
                 @Override
