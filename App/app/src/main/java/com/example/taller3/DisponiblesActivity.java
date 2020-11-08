@@ -31,15 +31,12 @@ import java.util.List;
 public class DisponiblesActivity extends AppCompatActivity {
 
     private static final String PATH_USERS = "users/";
-    private static final String PATH_IMAGE = "images/";
 
     private FirebaseAuth mAuth;
     private FirebaseUser user;
     private FirebaseDatabase mDatabase;
-    private StorageReference mStorage;
     private DatabaseReference mRef;
     private Usuario data;
-    private byte[] myPhoto;
 
     private DisponiblesAdapter adapter;
     private ListView listView;
@@ -56,13 +53,8 @@ public class DisponiblesActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         mDatabase = FirebaseDatabase.getInstance();
         mRef = mDatabase.getReference(PATH_USERS);
-        mStorage = FirebaseStorage.getInstance().getReference();
         listView = findViewById(R.id.lvLayout);
         initDisponibles();
-        /*disponibles.add(new Usuario("Juan Camilo", "Chafloque Mesia", 1020828518, 4.65, -74.5, false));
-        disponibles.add(new Usuario("Martin", "Chafloque Mesia", 1000201020, 4.76, -74.32, false));
-        disponibles.add(new Usuario("Julio", "Mejía Vera", 100431020, 4.43, -74.21, false));
-        disponibles.add(new Usuario("Julian", "Parada", 100431020, 4.43, -74.21, false));*/
     }
 
     @Override
@@ -106,13 +98,14 @@ public class DisponiblesActivity extends AppCompatActivity {
         return true;
     }
 
-    public void initCurrentUser(FirebaseUser user){
+    public void initCurrentUser(final FirebaseUser user){
         if(user != null){
             mRef = mDatabase.getReference(PATH_USERS + user.getUid());
             mRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     data = dataSnapshot.getValue(Usuario.class);
+                    data.setKey(user.getUid());
                     swDisp.setChecked(data.getDisponible());
                 }
                 @Override
@@ -131,9 +124,8 @@ public class DisponiblesActivity extends AppCompatActivity {
                 List<Usuario> disponibles = new ArrayList<>();
                 for(DataSnapshot entity: dataSnapshot.getChildren()){
                     Usuario usuario = entity.getValue(Usuario.class);
-                    if(usuario.getDisponible() && entity.getKey() != user.getUid()){
+                    if(usuario.getDisponible() && !entity.getKey().equals(data.getKey())){
                         usuario.setKey(entity.getKey());
-                        usuario.setPhoto(getPhoto(entity.getKey()));
                         disponibles.add(usuario);
                     }
                 }
@@ -146,23 +138,5 @@ public class DisponiblesActivity extends AppCompatActivity {
 
             }
         });
-    }
-
-    private byte[] getPhoto(String id){
-        final long ONE_MEGABYTE = 1024 * 1024;
-        final StorageReference photoRef = mStorage.child(PATH_IMAGE + id + "/profile.png");
-        photoRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
-            @Override
-            public void onSuccess(byte[] bytes) {
-                myPhoto = bytes;
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Toast.makeText(DisponiblesActivity.this, "Data recollection failed!", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        return myPhoto;
     }
 }

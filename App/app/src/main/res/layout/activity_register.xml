@@ -86,45 +86,15 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/etCorreo" />
 
-        <LinearLayout
-            android:id="@+id/linearLayout2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:orientation="horizontal"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/etPassword">
-
-            <EditText
-                android:id="@+id/etLat"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:ems="10"
-                android:hint="Latitude"
-                android:inputType="phone" />
-
-            <EditText
-                android:id="@+id/etLong"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:ems="10"
-                android:hint="Longitude"
-                android:inputType="phone" />
-
-        </LinearLayout>
-
         <ImageView
             android:id="@+id/ivPhoto"
             android:layout_width="150dp"
             android:layout_height="150dp"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="20dp"
             android:scaleType="fitCenter"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/linearLayout2" />
+            app:layout_constraintTop_toBottomOf="@+id/etPassword" />
 
         <LinearLayout
             android:id="@+id/linearLayout3"

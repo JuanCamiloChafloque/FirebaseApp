@@ -231,6 +231,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         mMap.addMarker(new MarkerOptions().position(otherLocation).title("Other user location").alpha(0.75f)
                                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));
                         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 12));
+                        double dist = distance(myLocation.latitude, myLocation.longitude, otherLocation.latitude, otherLocation.longitude);
+                        Toast.makeText(MapsActivity.this, "Distance is: " + dist + " km", Toast.LENGTH_LONG).show();
                     }
                 }
             }
@@ -317,6 +319,19 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
             });
         }
+    }
+
+    private double distance(double myLat, double myLong, double otherLat, double otherLong){
+        double latDistance = Math.toRadians(myLat - otherLat);
+        double longDistance = Math.toRadians(myLong - otherLong);
+
+        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2) + Math.cos(Math.toRadians(myLat)) *
+                Math.cos(Math.toRadians(otherLat)) * Math.sin(longDistance / 2) * Math.sin(longDistance / 2);
+
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        double res = 6371.01 * c;
+
+        return Math.round(res * 100.0) / 100.0;
     }
 
     @Override

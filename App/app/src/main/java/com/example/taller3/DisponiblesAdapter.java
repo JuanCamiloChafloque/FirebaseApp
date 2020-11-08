@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.text.Layout;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -23,21 +24,27 @@ import androidx.core.content.ContextCompat;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 public class DisponiblesAdapter extends ArrayAdapter<Usuario> {
 
+    private static final String PATH_IMAGE = "images/";
 
     private Context context;
     private List<Usuario> usuarios;
+    private StorageReference mStorage;
 
     public DisponiblesAdapter(Context context, List<Usuario> usuarios){
         super(context, R.layout.disponibles, usuarios);
         this.context = context;
         this.usuarios = usuarios;
+        this.mStorage = FirebaseStorage.getInstance().getReference();
     }
 
     @Override
@@ -59,12 +66,31 @@ public class DisponiblesAdapter extends ArrayAdapter<Usuario> {
 
         ImageView ivPhoto = mView.findViewById(R.id.ivProfile);
 
-        //Bitmap bm = BitmapFactory.decodeByteArray(usuarios.get(i).getPhoto(), 0, usuarios.get(i).getPhoto().length);
-        //ivPhoto.setImageBitmap(bm);
-        ivPhoto.setImageResource(R.drawable.app);
+        try {
+            downloadFile(this.usuarios.get(i).getKey(), ivPhoto);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         name.setText(this.usuarios.get(i).getName());
         apellido.setText(this.usuarios.get(i).getApellido());
 
         return mView;
+    }
+
+    private void downloadFile(String id, final ImageView ivPhoto) throws IOException {
+        final File localFile = File.createTempFile("images", "png");
+        StorageReference imageRef = mStorage.child(PATH_IMAGE + id + "/profile.png");
+        imageRef.getFile(localFile)
+                .addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                        ivPhoto.setImageURI(Uri.fromFile(localFile));
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+            }
+        });
     }
 }

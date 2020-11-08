@@ -8,10 +8,13 @@ import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -21,6 +24,18 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResponse;
+import com.google.android.gms.location.SettingsClient;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -49,7 +64,8 @@ public class RegisterActivity extends AppCompatActivity {
     private static final String PATH_USERS = "users/";
     private static final String PATH_IMAGE = "images/";
 
-    private EditText etName, etApellido, etCorreo, etPassword, etIdentificacion, etLat, etLong;
+    private EditText etName, etApellido, etCorreo, etPassword, etIdentificacion;
+    private double lat = -1, lon = -1;
     private Button btnGallery, btnCamera, btnRegister;
     private ImageView ivPhoto;
     private Bitmap bmImage;
@@ -59,6 +75,13 @@ public class RegisterActivity extends AppCompatActivity {
     private DatabaseReference mRef;
     private StorageReference mStorage;
 
+    private FusedLocationProviderClient mFusedLocationClient;
+    private LocationRequest mLocationRequest;
+    private LocationCallback mLocationCallback;
+
+    private static final int REQUEST_CHECK_SETTINGS = 99;
+    private static final int LOCATION_PERMISSION_CODE = 101;
+    private String justificacion = "Se necesita el GPS para mostrar la ubicación del evento";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,8 +101,6 @@ public class RegisterActivity extends AppCompatActivity {
         etCorreo = findViewById(R.id.etCorreo);
         etPassword = findViewById(R.id.etPassword);
         etIdentificacion = findViewById(R.id.etId);
-        etLat = findViewById(R.id.etLat);
-        etLong = findViewById(R.id.etLong);
 
         btnGallery = findViewById(R.id.btnGallery);
         btnCamera = findViewById(R.id.btnCamera);
@@ -113,6 +134,91 @@ public class RegisterActivity extends AppCompatActivity {
                 signUpUser();
             }
         });
+
+        if (ContextCompat.checkSelfPermission(RegisterActivity.this,
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            requestLocation();
+        }
+        updateCurrentPosition();
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        mLocationRequest = createLocationRequest();
+    }
+
+    public static void request(final Activity activity, final String permissionCode , String justificacion, final int idCode) {
+        if (ActivityCompat.shouldShowRequestPermissionRationale(activity,
+                permissionCode)) {
+
+            new AlertDialog.Builder(activity)
+                    .setTitle("Se necesita un permiso")
+                    .setMessage(justificacion)
+                    .setPositiveButton("ok", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            ActivityCompat.requestPermissions(activity,
+                                    new String[]{permissionCode}, idCode);
+                        }
+                    })
+                    .setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    })
+                    .create().show();
+
+        } else {
+            ActivityCompat.requestPermissions(activity,
+                    new String[]{permissionCode}, idCode);
+        }
+    }
+
+    private void requestLocation(){
+
+        request(this,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                justificacion,
+                LOCATION_PERMISSION_CODE);
+
+        if (ContextCompat.checkSelfPermission(RegisterActivity.this,
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder().addLocationRequest(mLocationRequest);
+            SettingsClient client = LocationServices.getSettingsClient(this);
+            Task<LocationSettingsResponse> task = client.checkLocationSettings(builder.build());
+
+            task.addOnSuccessListener(this, new OnSuccessListener<LocationSettingsResponse>() {
+                @Override
+                public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
+                    startLocationUpdates();
+                }
+            });
+        }
+    }
+
+    protected LocationRequest createLocationRequest() {
+        LocationRequest locationRequest = new LocationRequest();
+        locationRequest.setInterval(10000);
+        locationRequest.setFastestInterval(5000);
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        return locationRequest;
+    }
+
+    private void startLocationUpdates() {
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            mFusedLocationClient.requestLocationUpdates(mLocationRequest, mLocationCallback, null);
+        }
+    }
+
+    public void updateCurrentPosition(){
+        mLocationCallback = new LocationCallback(){
+            public void onLocationResult(LocationResult locationResult){
+                Location location = locationResult.getLastLocation();
+                if(location != null){
+                    lat = location.getLatitude();
+                    lon = location.getLongitude();
+                }
+            }
+        };
     }
 
     private boolean requestPermission(Activity context, String permit, String justification, int id){
@@ -191,6 +297,15 @@ public class RegisterActivity extends AppCompatActivity {
                 }
                 break;
             }
+            case REQUEST_CHECK_SETTINGS: {
+                if (resultCode == RESULT_OK) {
+                    startLocationUpdates();
+                } else {
+                    Toast.makeText(this,
+                            "Sin acceso a localización, hardware deshabilitado!", Toast.LENGTH_LONG).show();
+                }
+                return;
+            }
         }
     }
 
@@ -206,18 +321,16 @@ public class RegisterActivity extends AppCompatActivity {
             final String name = etName.getText().toString();
             final String apellido = etApellido.getText().toString();
             final String id = etIdentificacion.getText().toString();
-            final String lat = etLat.getText().toString();
-            final String lon = etLong.getText().toString();
             if (!name.equalsIgnoreCase("")
-                    && !apellido.equalsIgnoreCase("") && !id.equalsIgnoreCase("") && !lat.equalsIgnoreCase("")
-                    && !lon.equalsIgnoreCase("")) {
+                    && !apellido.equalsIgnoreCase("") && !id.equalsIgnoreCase("") && lat != -1
+                    && lon != -1) {
                 Usuario newUser = new Usuario();
                 newUser.setName(name);
                 newUser.setApellido(apellido);
                 newUser.setId(Integer.parseInt(id));
-                newUser.setLatitude(Double.parseDouble(lat));
-                newUser.setLongitude(Double.parseDouble(lon));
-                newUser.setDisponible(false);
+                newUser.setLatitude(lat);
+                newUser.setLongitude(lon);
+                newUser.setDisponible(true);
 
                 mRef = mDatabase.getReference(PATH_USERS + user.getUid());
                 mRef.setValue(newUser);
@@ -269,5 +382,27 @@ public class RegisterActivity extends AppCompatActivity {
         } else {
             Toast.makeText(this, "All fields are required!", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    @Override
+    public void onPause(){
+        super.onPause();
+        stopLocationUpdates();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        startLocationUpdates();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        stopLocationUpdates();
+    }
+
+    private void stopLocationUpdates(){
+        mFusedLocationClient.removeLocationUpdates(mLocationCallback);
     }
 }
