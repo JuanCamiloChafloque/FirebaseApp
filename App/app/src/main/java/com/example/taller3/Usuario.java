@@ -4,6 +4,7 @@ import android.net.CaptivePortal;
 
 public class Usuario {
 
+    private String key;
     private String name;
     private String apellido;
     private int id;
@@ -16,13 +17,22 @@ public class Usuario {
 
     }
 
-    public Usuario(String name, String apellido, int id, double latitude, double longitude, boolean disponible){
+    public Usuario(String key, String name, String apellido, int id, double latitude, double longitude, boolean disponible){
+        this.key = key;
         this.name = name;
         this.apellido = apellido;
         this.id = id;
         this.latitude= latitude;
         this.longitude = longitude;
         this.disponible = disponible;
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
     }
 
     public void setName(String name){

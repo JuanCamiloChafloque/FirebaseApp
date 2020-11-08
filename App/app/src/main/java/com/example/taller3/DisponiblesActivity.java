@@ -39,10 +39,10 @@ public class DisponiblesActivity extends AppCompatActivity {
     private StorageReference mStorage;
     private DatabaseReference mRef;
     private Usuario data;
+    private byte[] myPhoto;
 
     private DisponiblesAdapter adapter;
     private ListView listView;
-    private List<Usuario> disponibles = new ArrayList<Usuario>();
 
     private Switch swDisp;
 
@@ -57,14 +57,12 @@ public class DisponiblesActivity extends AppCompatActivity {
         mDatabase = FirebaseDatabase.getInstance();
         mRef = mDatabase.getReference(PATH_USERS);
         mStorage = FirebaseStorage.getInstance().getReference();
+        listView = findViewById(R.id.lvLayout);
         initDisponibles();
-        disponibles.add(new Usuario("Juan Camilo", "Chafloque Mesia", 1020828518, 4.65, -74.5, false));
+        /*disponibles.add(new Usuario("Juan Camilo", "Chafloque Mesia", 1020828518, 4.65, -74.5, false));
         disponibles.add(new Usuario("Martin", "Chafloque Mesia", 1000201020, 4.76, -74.32, false));
         disponibles.add(new Usuario("Julio", "Mejía Vera", 100431020, 4.43, -74.21, false));
-        disponibles.add(new Usuario("Julian", "Parada", 100431020, 4.43, -74.21, false));
-        listView = findViewById(R.id.lvLayout);
-        adapter = new DisponiblesAdapter(this, disponibles);
-        listView.setAdapter(adapter);
+        disponibles.add(new Usuario("Julian", "Parada", 100431020, 4.43, -74.21, false));*/
     }
 
     @Override
@@ -127,28 +125,20 @@ public class DisponiblesActivity extends AppCompatActivity {
 
     private void initDisponibles(){
         mRef = mDatabase.getReference(PATH_USERS);
-        mRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        mRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                List<Usuario> disponibles = new ArrayList<>();
                 for(DataSnapshot entity: dataSnapshot.getChildren()){
-                    final Usuario usuario = entity.getValue(Usuario.class);
+                    Usuario usuario = entity.getValue(Usuario.class);
                     if(usuario.getDisponible()){
-                        final long ONE_MEGABYTE = 1024 * 1024;
-                        StorageReference photoRef = mStorage.child(PATH_IMAGE + entity.getKey() + "/profile.png");
-                        photoRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
-                            @Override
-                            public void onSuccess(byte[] bytes) {
-                                usuario.setPhoto(bytes);
-                                disponibles.add(usuario);
-                            }
-                        }).addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Toast.makeText(DisponiblesActivity.this, "Data recollection failed!", Toast.LENGTH_SHORT).show();
-                            }
-                        });
+                        usuario.setKey(entity.getKey());
+                        usuario.setPhoto(getPhoto(entity.getKey()));
+                        disponibles.add(usuario);
                     }
                 }
+                adapter = new DisponiblesAdapter(DisponiblesActivity.this, disponibles);
+                listView.setAdapter(adapter);
             }
 
             @Override
@@ -156,6 +146,23 @@ public class DisponiblesActivity extends AppCompatActivity {
 
             }
         });
-        Log.i("USUARIO", "" + disponibles.size());
+    }
+
+    private byte[] getPhoto(String id){
+        final long ONE_MEGABYTE = 1024 * 1024;
+        final StorageReference photoRef = mStorage.child(PATH_IMAGE + id + "/profile.png");
+        photoRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+            @Override
+            public void onSuccess(byte[] bytes) {
+                myPhoto = bytes;
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Toast.makeText(DisponiblesActivity.this, "Data recollection failed!", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        return myPhoto;
     }
 }

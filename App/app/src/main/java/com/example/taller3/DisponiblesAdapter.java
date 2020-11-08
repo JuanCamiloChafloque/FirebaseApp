@@ -14,12 +14,20 @@ import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
+
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.List;
 
 public class DisponiblesAdapter extends ArrayAdapter<Usuario> {
+
 
     private Context context;
     private List<Usuario> usuarios;
@@ -44,15 +52,13 @@ public class DisponiblesAdapter extends ArrayAdapter<Usuario> {
                 Log.i("button", usuarios.get(i).getLatitude() + " " + usuarios.get(i).getLongitude());
             }
         });
-        ImageView ivPhoto = mView.findViewById(R.id.ivProfile);
+        final ImageView ivPhoto = mView.findViewById(R.id.ivProfile);
 
-        //Bitmap bm = BitmapFactory.decodeByteArray(this.usuarios.get(i).getPhoto(), 0, this.usuarios.get(i).getPhoto().length);
+        Bitmap bm = BitmapFactory.decodeByteArray(usuarios.get(i).getPhoto(), 0, usuarios.get(i).getPhoto().length);
+        ivPhoto.setImageBitmap(bm);
         name.setText(this.usuarios.get(i).getName());
         apellido.setText(this.usuarios.get(i).getApellido());
-        //ivPhoto.setImageBitmap(bm);
-        ivPhoto.setImageResource(R.drawable.app);
 
         return mView;
-
     }
 }
