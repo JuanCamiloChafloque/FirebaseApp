@@ -39,12 +39,14 @@ public class DisponiblesAdapter extends ArrayAdapter<Usuario> {
     private Context context;
     private List<Usuario> usuarios;
     private StorageReference mStorage;
+    private String currUserId;
 
-    public DisponiblesAdapter(Context context, List<Usuario> usuarios){
+    public DisponiblesAdapter(Context context, List<Usuario> usuarios, String currUserId){
         super(context, R.layout.disponibles, usuarios);
         this.context = context;
         this.usuarios = usuarios;
         this.mStorage = FirebaseStorage.getInstance().getReference();
+        this.currUserId = currUserId;
     }
 
     @Override
@@ -55,14 +57,19 @@ public class DisponiblesAdapter extends ArrayAdapter<Usuario> {
         TextView name = mView.findViewById(R.id.tvName);
         TextView apellido = mView.findViewById(R.id.tvLast);
         Button btnLoc = mView.findViewById(R.id.btnLocation);
-        btnLoc.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(getContext(), MapsActivity.class);
-                intent.putExtra("key", usuarios.get(i).getKey());
-                view.getContext().startActivity(intent);
-            }
-        });
+        if(!this.currUserId.equalsIgnoreCase(this.usuarios.get(i).getKey())){
+            btnLoc.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(getContext(), MapsActivity.class);
+                    intent.putExtra("key", usuarios.get(i).getKey());
+                    view.getContext().startActivity(intent);
+                }
+            });
+        } else {
+            btnLoc.setText("Estoy Conectado!");
+            btnLoc.setClickable(false);
+        }
 
         ImageView ivPhoto = mView.findViewById(R.id.ivProfile);
 

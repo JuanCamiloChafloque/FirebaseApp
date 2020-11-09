@@ -124,12 +124,12 @@ public class DisponiblesActivity extends AppCompatActivity {
                 List<Usuario> disponibles = new ArrayList<>();
                 for(DataSnapshot entity: dataSnapshot.getChildren()){
                     Usuario usuario = entity.getValue(Usuario.class);
-                    if(usuario.getDisponible() && !entity.getKey().equals(data.getKey())){
+                    if(usuario.getDisponible()){
                         usuario.setKey(entity.getKey());
                         disponibles.add(usuario);
                     }
                 }
-                adapter = new DisponiblesAdapter(DisponiblesActivity.this, disponibles);
+                adapter = new DisponiblesAdapter(DisponiblesActivity.this, disponibles, data.getKey());
                 listView.setAdapter(adapter);
             }
 
