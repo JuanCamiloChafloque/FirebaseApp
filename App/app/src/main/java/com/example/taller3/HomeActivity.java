@@ -110,6 +110,7 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
             requestPermission();
         }
         updateCurrentPosition();
+
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         mLocationRequest = createLocationRequest();
     }
@@ -144,6 +145,8 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
             updateCurrentPosition();
         }
+
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(4.65, -74.05), 12));
 
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder().addLocationRequest(mLocationRequest);
         SettingsClient client = LocationServices.getSettingsClient(this);
@@ -223,8 +226,8 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     protected LocationRequest createLocationRequest() {
         LocationRequest locationRequest = new LocationRequest();
-        locationRequest.setInterval(20000);
-        locationRequest.setFastestInterval(15000);
+        locationRequest.setInterval(10000);
+        locationRequest.setFastestInterval(5000);
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         return locationRequest;
     }
@@ -240,14 +243,22 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
         mLocationCallback = new LocationCallback(){
             public void onLocationResult(LocationResult locationResult){
                 Location location = locationResult.getLastLocation();
-                if(location != null){
+                if(location != null && data != null){
                     LatLng myLocation = new LatLng(data.getLatitude(), data.getLongitude());
                     if(mMap != null){
                         mMap.clear();
                         initLocations();
                         mMap.addMarker(new MarkerOptions().position(myLocation).title("Current location").snippet("My Home").alpha(0.75f)
                                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
-                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 12));
+                        if(location.getLatitude() != data.getLatitude() && location.getLongitude() != data.getLongitude()){
+                            data.setLatitude(location.getLatitude());
+                            data.setLongitude(location.getLongitude());
+                            mRef = mDatabase.getReference(PATH_USERS + user.getUid() + "/" + "latitude");
+                            mRef.setValue(location.getLatitude());
+                            mRef = mDatabase.getReference(PATH_USERS + user.getUid() + "/" + "longitude");
+                            mRef.setValue(location.getLongitude());
+                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 14));
+                        }
                     }
                 }
             }

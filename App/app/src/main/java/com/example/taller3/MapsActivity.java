@@ -241,7 +241,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                             mRef.setValue(location.getLatitude());
                             mRef = mDatabase.getReference(PATH_USERS + user.getUid() + "/" + "longitude");
                             mRef.setValue(location.getLongitude());
-                            double dist = distance(myLocation.latitude, myLocation.longitude, otherLocation.latitude, otherLocation.longitude);
+                            double dist = distance(data.getLatitude(), data.getLongitude(), other.getLatitude(), other.getLongitude());
                             Toast.makeText(MapsActivity.this, "Distance is: " + dist + " km", Toast.LENGTH_LONG).show();
                             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 14));
                         }
