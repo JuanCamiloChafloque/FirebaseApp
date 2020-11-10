@@ -41,8 +41,6 @@ public class DisponiblesActivity extends AppCompatActivity {
     private DisponiblesAdapter adapter;
     private ListView listView;
 
-    private Switch swDisp;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,40 +61,6 @@ public class DisponiblesActivity extends AppCompatActivity {
         initCurrentUser(user);
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu, menu);
-        MenuItem disp = menu.findItem(R.id.menuDisp);
-        swDisp = (Switch) disp.getActionView();
-
-        swDisp.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(swDisp.isChecked()){
-                    mRef = mDatabase.getReference(PATH_USERS + user.getUid() + "/" + "disponible");
-                    mRef.setValue(true);
-                } else {
-                    mRef = mDatabase.getReference(PATH_USERS + user.getUid() + "/" + "disponible");
-                    mRef.setValue(false);
-                }
-            }
-        });
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        int id = item.getItemId();
-        if(id == R.id.menuLogOut) {
-            mAuth.signOut();
-            Intent intent = new Intent(DisponiblesActivity.this, MainActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(intent);
-        }
-
-        return true;
-    }
-
     public void initCurrentUser(final FirebaseUser user){
         if(user != null){
             mRef = mDatabase.getReference(PATH_USERS + user.getUid());
@@ -105,7 +69,6 @@ public class DisponiblesActivity extends AppCompatActivity {
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     data = dataSnapshot.getValue(Usuario.class);
                     data.setKey(user.getUid());
-                    swDisp.setChecked(data.getDisponible());
                     initDisponibles();
                 }
                 @Override

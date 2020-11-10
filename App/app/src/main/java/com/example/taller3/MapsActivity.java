@@ -88,13 +88,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .findFragmentById(R.id.followMap);
         mapFragment.getMapAsync(this);
 
-        if (ContextCompat.checkSelfPermission(MapsActivity.this,
-                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            requestPermission();
-        }
-        updateCurrentPosition();
-        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-        mLocationRequest = createLocationRequest();
+
     }
 
     @Override
@@ -103,6 +97,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         user = mAuth.getCurrentUser();
         if(user != null){
             initCurrentUser(user);
+            if (ContextCompat.checkSelfPermission(MapsActivity.this,
+                    Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                requestPermission();
+            }
+            updateCurrentPosition();
+            mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+            mLocationRequest = createLocationRequest();
         } else{
             Intent intent = new Intent(MapsActivity.this, MainActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
