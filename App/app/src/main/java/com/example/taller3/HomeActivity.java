@@ -253,6 +253,7 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onLocationResult(LocationResult locationResult){
                 Location location = locationResult.getLastLocation();
                 if(location != null && data != null){
+                    swDisp.setChecked(data.getDisponible());
                     LatLng myLocation = new LatLng(data.getLatitude(), data.getLongitude());
                     if(mMap != null){
                         mMap.clear();
@@ -362,11 +363,10 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void initCurrentUser(FirebaseUser user){
         if(user != null){
             mRef = mDatabase.getReference(PATH_USERS + user.getUid());
-            mRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            mRef.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     data = dataSnapshot.getValue(Usuario.class);
-                    swDisp.setChecked(data.getDisponible());
                 }
                 @Override
                 public void onCancelled(@NonNull DatabaseError databaseError) {

@@ -88,28 +88,28 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .findFragmentById(R.id.followMap);
         mapFragment.getMapAsync(this);
 
+        user = mAuth.getCurrentUser();
+        if(user == null){
+            Intent intent = new Intent(MapsActivity.this, MainActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
+                    Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
+        }
 
+        initCurrentUser(user);
+        if (ContextCompat.checkSelfPermission(MapsActivity.this,
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            requestPermission();
+        }
+        updateCurrentPosition();
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        mLocationRequest = createLocationRequest();
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        user = mAuth.getCurrentUser();
-        if(user != null){
-            initCurrentUser(user);
-            if (ContextCompat.checkSelfPermission(MapsActivity.this,
-                    Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                requestPermission();
-            }
-            updateCurrentPosition();
-            mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-            mLocationRequest = createLocationRequest();
-        } else{
-            Intent intent = new Intent(MapsActivity.this, MainActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
-                    Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
-        }
     }
 
     @Override
