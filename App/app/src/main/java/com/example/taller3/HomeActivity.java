@@ -9,12 +9,15 @@ import androidx.fragment.app.FragmentActivity;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.hardware.SensorManager;
 import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -88,6 +91,9 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static final int LOCATION_PERMISSION_CODE = 101;
     private String justificacion = "Se necesita el GPS para mostrar la ubicación del evento";
 
+    private static String CHANNEL_ID = "MyApp";
+    private static final String TAG = "HomeActivity";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -99,7 +105,6 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         locations = new ArrayList<>();
 
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
@@ -113,6 +118,10 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         mLocationRequest = createLocationRequest();
+
+        createNotificationChannel();
+        Intent intent = new Intent(HomeActivity.this, NotificationFirebaseIntentService.class);
+        NotificationFirebaseIntentService.enqueueWork(HomeActivity.this, intent);
     }
 
     @Override
@@ -387,5 +396,17 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void stopLocationUpdates(){
         mFusedLocationClient.removeLocationUpdates(mLocationCallback);
+    }
+
+    private void createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = "channel";
+            String description = "channel description";
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
+            channel.setDescription(description);
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
     }
 }

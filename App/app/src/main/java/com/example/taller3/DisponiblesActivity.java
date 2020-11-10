@@ -54,7 +54,6 @@ public class DisponiblesActivity extends AppCompatActivity {
         mDatabase = FirebaseDatabase.getInstance();
         mRef = mDatabase.getReference(PATH_USERS);
         listView = findViewById(R.id.lvLayout);
-        initDisponibles();
     }
 
     @Override
@@ -107,6 +106,7 @@ public class DisponiblesActivity extends AppCompatActivity {
                     data = dataSnapshot.getValue(Usuario.class);
                     data.setKey(user.getUid());
                     swDisp.setChecked(data.getDisponible());
+                    initDisponibles();
                 }
                 @Override
                 public void onCancelled(@NonNull DatabaseError databaseError) {
