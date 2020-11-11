@@ -69,7 +69,7 @@ public class NotificationFirebaseIntentService extends JobIntentService {
                     Usuario usuario = entity.getValue(Usuario.class);
                     usuario.setKey(entity.getKey());
                     boolean changeAux = stateChange(usuario);
-                    if(firebaseAuth.getCurrentUser() != null && changeAux && usuario.getKey() != data.getKey()){
+                    if(firebaseAuth.getCurrentUser() != null && changeAux && !usuario.getKey().equals(data.getKey())){
                         buildAndShowNotification("Usuario Disponible", "El usuario: "+usuario.getName()+" se encuentra DISPONIBLE", usuario.getKey());
                     }
                 }
@@ -108,6 +108,7 @@ public class NotificationFirebaseIntentService extends JobIntentService {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     data = dataSnapshot.getValue(Usuario.class);
+                    data.setKey(dataSnapshot.getKey());
                     llenarInicial();
                 }
                 @Override
